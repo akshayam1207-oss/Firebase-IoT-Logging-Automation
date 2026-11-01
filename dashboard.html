@@ -1,0 +1,2399 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Smart IoT Monitoring Dashboard</title>
+
+<!-- Font Awesome -->
+<link
+rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+
+<style>
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f4f7fb;
+    color: #172033;
+}
+
+
+/* ===============================
+   SIDEBAR
+================================ */
+
+.sidebar {
+
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 245px;
+    height: 100vh;
+
+    background:
+        linear-gradient(
+            180deg,
+            #07182e,
+            #0d2849
+        );
+
+    color: white;
+
+    padding: 25px 18px;
+}
+
+.brand {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 10px;
+
+    margin-bottom: 40px;
+}
+
+.brand-icon {
+
+    width: 46px;
+    height: 46px;
+
+    border-radius: 13px;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    background:
+        linear-gradient(
+            135deg,
+            #00c6ff,
+            #0072ff
+        );
+
+    font-size: 21px;
+}
+
+.brand h2 {
+    font-size: 19px;
+}
+
+.nav-item {
+
+    padding: 14px 16px;
+
+    margin: 7px 0;
+
+    border-radius: 9px;
+
+    color: #c7d8ec;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease;
+}
+
+.nav-item:hover {
+    background: rgba(33,150,243,.12);
+    color: #55d6ff;
+}
+
+.nav-item i {
+    width: 27px;
+}
+
+.nav-item.active {
+
+    background:
+        rgba(
+            33,
+            150,
+            243,
+            .18
+        );
+
+    color: #55d6ff;
+}
+
+
+/* ===============================
+   MAIN
+================================ */
+
+.main {
+
+    margin-left: 245px;
+
+    min-height: 100vh;
+}
+
+
+/* ===============================
+   HEADER
+================================ */
+
+header {
+
+    height: 78px;
+
+    background: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 32px;
+
+    box-shadow:
+        0 2px 12px
+        rgba(0,0,0,.05);
+}
+
+.header-left h1 {
+    font-size: 23px;
+}
+
+.header-left p {
+
+    color: #8993a4;
+
+    font-size: 13px;
+
+    margin-top: 4px;
+}
+
+.header-right {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+}
+
+.online {
+
+    color: #159447;
+
+    background: #e8f8ee;
+
+    padding: 8px 13px;
+
+    border-radius: 25px;
+
+    font-size: 13px;
+}
+
+.logout {
+
+    border: none;
+
+    padding: 10px 16px;
+
+    border-radius: 8px;
+
+    background: #eef2f6;
+
+    cursor: pointer;
+}
+
+
+/* ===============================
+   CONTENT
+================================ */
+
+.content {
+    padding: 30px;
+}
+
+
+/* ===============================
+   SENSOR CARDS
+================================ */
+
+.sensor-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(180px,1fr)
+        );
+
+    gap: 20px;
+}
+
+.sensor-card {
+
+    background: white;
+
+    border-radius: 16px;
+
+    padding: 22px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(32,56,85,.07);
+}
+
+.card-top {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+}
+
+.sensor-card h4 {
+
+    color: #738096;
+
+    font-size: 14px;
+}
+
+.sensor-icon {
+
+    width: 43px;
+    height: 43px;
+
+    border-radius: 12px;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    background: #eaf5ff;
+
+    color: #1185e9;
+
+    font-size: 19px;
+}
+
+.sensor-value {
+
+    font-size: 31px;
+
+    font-weight: 700;
+
+    margin-top: 18px;
+}
+
+.small-text {
+
+    margin-top: 8px;
+
+    color: #9aa4b3;
+
+    font-size: 12px;
+}
+
+
+/* ===============================
+   TWO COLUMN
+================================ */
+
+.two-column {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 20px;
+
+    margin-top: 24px;
+}
+
+.panel {
+
+    background: white;
+
+    padding: 24px;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(32,56,85,.07);
+}
+
+.panel-title {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content:
+        space-between;
+
+    margin-bottom: 22px;
+}
+
+.panel-title h3 {
+    font-size: 17px;
+}
+
+
+/* ===============================
+   MODE BUTTONS
+================================ */
+
+.mode-buttons {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 12px;
+}
+
+.mode-button {
+
+    padding: 13px;
+
+    border: 1px solid #dae1ea;
+
+    border-radius: 9px;
+
+    background: white;
+
+    cursor: pointer;
+
+    font-weight: 600;
+}
+
+.mode-button:hover {
+
+    border-color: #1689ff;
+}
+
+
+/* ===============================
+   CONTROL
+================================ */
+
+.control-row {
+    margin-top: 24px;
+}
+
+.control-label {
+
+    margin-bottom: 10px;
+
+    font-size: 13px;
+
+    color: #738096;
+}
+
+.bulb-buttons {
+
+    display: flex;
+
+    gap: 12px;
+}
+
+.bulb-button {
+
+    flex: 1;
+
+    padding: 13px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    font-weight: 600;
+}
+
+.on {
+
+    background: #1bb65d;
+
+    color: white;
+}
+
+.off {
+
+    background: #e94b4b;
+
+    color: white;
+}
+
+
+/* ===============================
+   THRESHOLD
+================================ */
+
+.threshold-box {
+    margin-top: 24px;
+}
+
+.threshold-box input {
+
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid #dce2ea;
+
+    border-radius: 8px;
+
+    margin:
+        8px 0 10px;
+}
+
+.save-button {
+
+    width: 100%;
+
+    border: none;
+
+    background: #1689ff;
+
+    color: white;
+
+    padding: 12px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+}
+
+
+/* ===============================
+   STATUS
+================================ */
+
+.status-line {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    padding: 13px 0;
+
+    border-bottom:
+        1px solid #eef1f5;
+}
+
+.status-line:last-child {
+    border: none;
+}
+
+.status-label {
+    color: #778398;
+}
+
+.status-value {
+    font-weight: 600;
+}
+
+
+/* ===============================
+   CHARTS
+================================ */
+
+.chart-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap: 20px;
+
+    margin-top: 24px;
+}
+
+.chart-card {
+
+    background: white;
+
+    padding: 20px;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(32,56,85,.07);
+}
+
+.chart-card h3 {
+
+    font-size: 16px;
+
+    margin-bottom: 20px;
+}
+
+.chart-container {
+    height: 240px;
+}
+
+
+/* ===============================
+   HISTORY
+================================ */
+
+.history {
+
+    margin-top: 24px;
+
+    background: white;
+
+    border-radius: 16px;
+
+    padding: 24px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(32,56,85,.07);
+}
+
+.history-header {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items: center;
+
+    margin-bottom: 20px;
+}
+
+.csv-button {
+
+    border: none;
+
+    background: #132c4c;
+
+    color: white;
+
+    padding: 11px 16px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+th {
+
+    color: #657288;
+
+    background: #f7f9fc;
+
+    font-size: 13px;
+}
+
+th,
+td {
+
+    padding: 13px;
+
+    text-align: center;
+
+    border-bottom:
+        1px solid #edf0f4;
+}
+
+td {
+    font-size: 13px;
+}
+
+.empty {
+
+    color: #9da7b5;
+
+    padding: 25px;
+}
+
+
+/* ===============================
+   RESPONSIVE
+================================ */
+
+@media(max-width:1100px) {
+
+    .sensor-grid {
+
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+    .chart-grid {
+
+        grid-template-columns: 1fr;
+    }
+}
+
+
+@media(max-width:750px) {
+
+    .sidebar {
+        display: none;
+    }
+
+    .main {
+        margin-left: 0;
+    }
+
+    .two-column {
+        grid-template-columns:1fr;
+    }
+
+    .sensor-grid {
+        grid-template-columns:1fr;
+    }
+
+    header {
+        padding:0 18px;
+    }
+
+    .content {
+        padding:18px;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- ===============================
+     SIDEBAR
+================================ -->
+
+<div class="sidebar">
+
+    <div class="brand">
+
+        <div class="brand-icon">
+
+            <i class="fa-solid fa-house-signal"></i>
+
+        </div>
+
+        <div>
+
+            <h2>Smart IoT</h2>
+
+            <small>Monitoring System</small>
+
+        </div>
+
+    </div>
+
+
+    <div class="nav-item active" onclick="navigateTo('dashboard', this)">
+
+        <i class="fa-solid fa-chart-pie"></i>
+
+        Dashboard
+
+    </div>
+
+
+    <div class="nav-item" onclick="navigateTo('environment', this)">
+
+        <i class="fa-solid fa-temperature-half"></i>
+
+        Environment
+
+    </div>
+
+
+    <div class="nav-item" onclick="navigateTo('appliance-control', this)">
+
+        <i class="fa-solid fa-lightbulb"></i>
+
+        Appliance Control
+
+    </div>
+
+
+    <div class="nav-item" onclick="navigateTo('analytics', this)">
+
+        <i class="fa-solid fa-chart-line"></i>
+
+        Analytics
+
+    </div>
+
+
+    <div class="nav-item" onclick="navigateTo('historical-data', this)">
+
+        <i class="fa-solid fa-database"></i>
+
+        Historical Data
+
+    </div>
+
+</div>
+
+
+
+<!-- ===============================
+     MAIN
+================================ -->
+
+<div class="main">
+
+
+<header>
+
+    <div class="header-left">
+
+        <h1>IoT Dashboard</h1>
+
+        <p>
+            Real-time environmental monitoring
+            and smart appliance control
+        </p>
+
+    </div>
+
+
+    <div class="header-right">
+
+        <div class="online">
+
+            <i class="fa-solid fa-circle"></i>
+
+            Firebase Connected
+
+        </div>
+
+
+        <button
+            class="logout"
+            onclick="logout()">
+
+            <i class="fa-solid fa-right-from-bracket"></i>
+
+            Logout
+
+        </button>
+
+    </div>
+
+</header>
+
+
+
+<div class="content" id="dashboard">
+
+
+<!-- ===============================
+     SENSOR CARDS
+================================ -->
+
+<div class="sensor-grid" id="environment">
+
+
+<div class="sensor-card">
+
+    <div class="card-top">
+
+        <h4>Temperature</h4>
+
+        <div class="sensor-icon">
+
+            <i class="fa-solid fa-temperature-half"></i>
+
+        </div>
+
+    </div>
+
+
+    <div class="sensor-value">
+
+        <span id="temperature">--</span>°C
+
+    </div>
+
+
+    <div class="small-text">
+
+        DHT11 Sensor
+
+    </div>
+
+</div>
+
+
+
+<div class="sensor-card">
+
+    <div class="card-top">
+
+        <h4>Humidity</h4>
+
+        <div class="sensor-icon">
+
+            <i class="fa-solid fa-droplet"></i>
+
+        </div>
+
+    </div>
+
+
+    <div class="sensor-value">
+
+        <span id="humidity">--</span>%
+
+    </div>
+
+
+    <div class="small-text">
+
+        Relative Humidity
+
+    </div>
+
+</div>
+
+
+
+<div class="sensor-card">
+
+    <div class="card-top">
+
+        <h4>Ambient Light</h4>
+
+        <div class="sensor-icon">
+
+            <i class="fa-solid fa-sun"></i>
+
+        </div>
+
+    </div>
+
+
+    <div class="sensor-value">
+
+        <span id="ldr">--</span>
+
+    </div>
+
+
+    <div class="small-text">
+
+        LDR Sensor Value
+
+    </div>
+
+</div>
+
+
+
+<div class="sensor-card">
+
+    <div class="card-top">
+
+        <h4>Bulb Status</h4>
+
+        <div class="sensor-icon">
+
+            <i class="fa-solid fa-lightbulb"></i>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="sensor-value"
+        id="bulbState">
+
+        --
+
+    </div>
+
+
+    <div class="small-text">
+
+        Relay Controlled
+
+    </div>
+
+</div>
+
+
+</div>
+
+
+
+<!-- ===============================
+     CONTROL + STATUS
+================================ -->
+
+<div class="two-column" id="appliance-control">
+
+
+<!-- CONTROL PANEL -->
+
+<div class="panel">
+
+
+<div class="panel-title">
+
+    <h3>
+
+        <i class="fa-solid fa-sliders"></i>
+
+        Appliance Control
+
+    </h3>
+
+</div>
+
+
+<div class="control-label">
+
+    Operating Mode
+
+</div>
+
+
+<div class="mode-buttons">
+
+
+<button
+    class="mode-button"
+    onclick="setMode('MANUAL')">
+
+    <i class="fa-solid fa-hand-pointer"></i>
+
+    Manual
+
+</button>
+
+
+<button
+    class="mode-button"
+    onclick="setMode('AUTO')">
+
+    <i class="fa-solid fa-wand-magic-sparkles"></i>
+
+    Automatic
+
+</button>
+
+
+</div>
+
+
+
+<div class="control-row">
+
+    <div class="control-label">
+
+        Manual Bulb Control
+
+    </div>
+
+
+    <div class="bulb-buttons">
+
+
+        <button
+            class="bulb-button on"
+            onclick="setBulb('ON')">
+
+            <i class="fa-solid fa-power-off"></i>
+
+            Bulb ON
+
+        </button>
+
+
+        <button
+            class="bulb-button off"
+            onclick="setBulb('OFF')">
+
+            <i class="fa-solid fa-power-off"></i>
+
+            Bulb OFF
+
+        </button>
+
+
+    </div>
+
+</div>
+
+
+
+<div class="threshold-box">
+
+    <div class="control-label">
+
+        Automatic Mode — LDR Threshold
+
+    </div>
+
+
+    <input
+        type="number"
+        id="threshold"
+        min="0"
+        max="1023"
+        placeholder="Example: 500">
+
+
+    <button
+        class="save-button"
+        onclick="saveThreshold()">
+
+        Save Threshold
+
+    </button>
+
+</div>
+
+
+<p
+    id="controlMessage"
+    style="
+    margin-top:15px;
+    font-size:13px;
+    color:#1689ff;
+    ">
+
+</p>
+
+
+</div>
+
+
+
+<!-- STATUS PANEL -->
+
+<div class="panel">
+
+
+<div class="panel-title">
+
+    <h3>
+
+        <i class="fa-solid fa-circle-info"></i>
+
+        System Status
+
+    </h3>
+
+</div>
+
+
+<div class="status-line">
+
+    <span class="status-label">
+
+        Operating Mode
+
+    </span>
+
+    <span
+        class="status-value"
+        id="mode">
+
+        --
+
+    </span>
+
+</div>
+
+
+<div class="status-line">
+
+    <span class="status-label">
+
+        Bulb
+
+    </span>
+
+    <span
+        class="status-value"
+        id="statusBulb">
+
+        --
+
+    </span>
+
+</div>
+
+
+<div class="status-line">
+
+    <span class="status-label">
+
+        LDR Threshold
+
+    </span>
+
+    <span
+        class="status-value"
+        id="thresholdDisplay">
+
+        --
+
+    </span>
+
+</div>
+
+
+<div class="status-line">
+
+    <span class="status-label">
+
+        ESP32 / Data
+
+    </span>
+
+    <span
+        class="status-value"
+        id="deviceStatus">
+
+        Waiting for data
+
+    </span>
+
+</div>
+
+
+<div class="status-line">
+
+    <span class="status-label">
+
+        Last Update
+
+    </span>
+
+    <span
+        class="status-value"
+        id="lastUpdate">
+
+        --
+
+    </span>
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<!-- ===============================
+     GRAPHS
+================================ -->
+
+<div class="chart-grid" id="analytics">
+
+
+<div class="chart-card">
+
+    <h3>
+        🌡 Temperature History
+    </h3>
+
+    <div class="chart-container">
+
+        <canvas id="temperatureChart"></canvas>
+
+    </div>
+
+</div>
+
+
+
+<div class="chart-card">
+
+    <h3>
+        💧 Humidity History
+    </h3>
+
+    <div class="chart-container">
+
+        <canvas id="humidityChart"></canvas>
+
+    </div>
+
+</div>
+
+
+
+<div class="chart-card">
+
+    <h3>
+        ☀ Ambient Light History
+    </h3>
+
+    <div class="chart-container">
+
+        <canvas id="ldrChart"></canvas>
+
+    </div>
+
+</div>
+
+
+</div>
+
+
+
+<!-- ===============================
+     HISTORY TABLE
+================================ -->
+
+<div class="history" id="historical-data">
+
+
+<div class="history-header">
+
+    <h3>
+
+        <i class="fa-solid fa-clock-rotate-left"></i>
+
+        Historical Data
+
+    </h3>
+
+
+    <button
+        class="csv-button"
+        onclick="downloadCSV()">
+
+        <i class="fa-solid fa-download"></i>
+
+        Download CSV
+
+    </button>
+
+</div>
+
+
+
+<div class="table-wrapper">
+
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Timestamp</th>
+
+<th>Temperature</th>
+
+<th>Humidity</th>
+
+<th>LDR</th>
+
+<th>Bulb State</th>
+
+<th>Mode</th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="historyTable">
+
+<tr>
+
+<td
+    colspan="6"
+    class="empty">
+
+    Waiting for sensor data...
+
+</td>
+
+</tr>
+
+</tbody>
+
+
+</table>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+</div>
+
+
+
+<script>
+
+
+/* =========================================================
+   FIREBASE CONFIGURATION
+========================================================= */
+
+const firebaseConfig = {
+
+    apiKey:
+    "AIzaSyCTUvo4L2E9QhDFQ21SSMKjA3BDTaOG8M4",
+
+    authDomain:
+    "smart-iot-monitoring-36700.firebaseapp.com",
+
+    databaseURL:
+    "https://smart-iot-monitoring-36700-default-rtdb.firebaseio.com/",
+
+    projectId:
+    "smart-iot-monitoring-36700",
+
+    storageBucket:
+    "smart-iot-monitoring-36700.firebasestorage.app",
+
+    messagingSenderId:
+    "306714863231",
+
+    appId:
+    "1:306714863231:web:717219a9fe968c3baa014a"
+
+};
+
+
+firebase.initializeApp(firebaseConfig);
+
+
+const auth =
+    firebase.auth();
+
+
+const database =
+    firebase.database();
+
+
+
+/* =========================================================
+   AUTHENTICATION CHECK
+========================================================= */
+
+auth.onAuthStateChanged(function(user) {
+
+    if (!user) {
+
+        window.location.href =
+            "index.html";
+
+    }
+
+});
+
+
+
+/* =========================================================
+   SIDEBAR NAVIGATION
+========================================================= */
+
+function navigateTo(sectionId, clickedItem) {
+
+    const section = document.getElementById(sectionId);
+
+    if (!section) {
+        return;
+    }
+
+    section.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+    document.querySelectorAll(".nav-item").forEach(function(item) {
+        item.classList.remove("active");
+    });
+
+    clickedItem.classList.add("active");
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+function logout() {
+
+    auth.signOut()
+
+    .then(function() {
+
+        window.location.href =
+            "index.html";
+
+    })
+
+    .catch(function(error) {
+
+        console.error(error);
+
+    });
+
+}
+
+
+
+/* =========================================================
+   CURRENT SENSOR DATA
+========================================================= */
+
+database
+.ref("current")
+.on("value", function(snapshot) {
+
+    const data =
+        snapshot.val();
+
+
+    if (!data) {
+
+        return;
+
+    }
+
+
+    document
+    .getElementById("temperature")
+    .innerText =
+        data.temperature ?? "--";
+
+
+    document
+    .getElementById("humidity")
+    .innerText =
+        data.humidity ?? "--";
+
+
+    document
+    .getElementById("ldr")
+    .innerText =
+        data.ldr ?? "--";
+
+
+
+    /* =============================================
+       IMPORTANT:
+       Firebase bulbState is Boolean.
+       Display ON / OFF properly.
+    ============================================= */
+
+    if (typeof data.bulbState === "boolean") {
+
+        document
+        .getElementById("bulbState")
+        .innerText =
+            data.bulbState
+            ? "ON"
+            : "OFF";
+
+
+        document
+        .getElementById("statusBulb")
+        .innerText =
+            data.bulbState
+            ? "ON"
+            : "OFF";
+
+    } else {
+
+        document
+        .getElementById("bulbState")
+        .innerText =
+            "--";
+
+
+        document
+        .getElementById("statusBulb")
+        .innerText =
+            "--";
+
+    }
+
+
+
+    document
+    .getElementById("mode")
+    .innerText =
+        data.mode ?? "--";
+
+
+    document
+    .getElementById("deviceStatus")
+    .innerText =
+        "Receiving data";
+
+
+    if (data.timestamp) {
+
+        document
+        .getElementById("lastUpdate")
+        .innerText =
+            data.timestamp;
+
+    }
+
+    else {
+
+        document
+        .getElementById("lastUpdate")
+        .innerText =
+            new Date().toLocaleString();
+
+    }
+
+});
+
+
+
+/* =========================================================
+   BULB CONTROL
+========================================================= */
+
+function setBulb(state) {
+
+
+    /* ---------------------------------------------
+       First check the current operating mode
+    --------------------------------------------- */
+
+    database
+    .ref("current/mode")
+    .once("value")
+
+    .then(function(snapshot) {
+
+
+        const mode =
+            snapshot.val();
+
+
+        /* -----------------------------------------
+           Do not allow manual control in AUTO mode
+        ----------------------------------------- */
+
+        if (mode === "AUTO") {
+
+            document
+            .getElementById("controlMessage")
+            .innerText =
+                "Switch to Manual mode to control the bulb directly.";
+
+            return null;
+
+        }
+
+
+        /* -----------------------------------------
+           IMPORTANT FIX
+
+           ON  -> true
+           OFF -> false
+
+           Firebase must store Boolean,
+           NOT "ON" / "OFF" strings.
+        ----------------------------------------- */
+
+        const bulbValue =
+            (state === "ON");
+
+
+        return database
+        .ref("current/bulbState")
+        .set(bulbValue);
+
+    })
+
+
+    .then(function(result) {
+
+
+        if (result === null) {
+
+            return;
+
+        }
+
+
+        document
+        .getElementById("controlMessage")
+        .innerText =
+            "Bulb " +
+            state +
+            " successfully.";
+
+    })
+
+
+    .catch(function(error) {
+
+        document
+        .getElementById("controlMessage")
+        .innerText =
+            "Error: " +
+            error.message;
+
+        console.error(error);
+
+    });
+
+}
+
+
+
+/* =========================================================
+   MODE CONTROL
+========================================================= */
+
+function setMode(mode) {
+
+
+    database
+    .ref("current/mode")
+    .set(mode)
+
+    .then(function() {
+
+
+        document
+        .getElementById("controlMessage")
+        .innerText =
+            "Operating mode changed to " +
+            mode;
+
+
+        /*
+           When changing to MANUAL,
+           keep the current bulb state.
+
+           AUTO mode will be controlled by ESP32.
+        */
+
+    })
+
+
+    .catch(function(error) {
+
+        document
+        .getElementById("controlMessage")
+        .innerText =
+            "Error: " +
+            error.message;
+
+    });
+
+}
+
+
+
+/* =========================================================
+   LDR THRESHOLD
+========================================================= */
+
+database
+.ref("settings/ldrThreshold")
+.on("value", function(snapshot) {
+
+
+    const value =
+        snapshot.val();
+
+
+    if (value !== null) {
+
+
+        document
+        .getElementById("threshold")
+        .value =
+            value;
+
+
+        document
+        .getElementById("thresholdDisplay")
+        .innerText =
+            value;
+
+    }
+
+});
+
+
+
+function saveThreshold() {
+
+
+    const value =
+        Number(
+            document
+            .getElementById("threshold")
+            .value
+        );
+
+
+    if (
+        !Number.isFinite(value) ||
+        value < 0 ||
+        value > 1023
+    ) {
+
+        document
+        .getElementById("controlMessage")
+        .innerText =
+            "Enter an LDR value between 0 and 1023.";
+
+        return;
+
+    }
+
+
+    database
+    .ref("settings/ldrThreshold")
+    .set(value)
+
+    .then(function() {
+
+
+        document
+        .getElementById("controlMessage")
+        .innerText =
+            "LDR threshold saved successfully.";
+
+    })
+
+    .catch(function(error) {
+
+        document
+        .getElementById("controlMessage")
+        .innerText =
+            "Error: " +
+            error.message;
+
+    });
+
+}
+
+
+
+/* =========================================================
+   TEMPERATURE CHART
+========================================================= */
+
+const temperatureChart =
+new Chart(
+
+    document
+    .getElementById(
+        "temperatureChart"
+    ),
+
+    {
+
+        type: "line",
+
+        data: {
+
+            labels: [],
+
+            datasets: [{
+
+                label:
+                    "Temperature °C",
+
+                data: [],
+
+                borderColor:
+                    "#f05a5a",
+
+                backgroundColor:
+                    "rgba(240,90,90,.1)",
+
+                tension: .35,
+
+                fill: true
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false
+
+        }
+
+    }
+
+);
+
+
+
+/* =========================================================
+   HUMIDITY CHART
+========================================================= */
+
+const humidityChart =
+new Chart(
+
+    document
+    .getElementById(
+        "humidityChart"
+    ),
+
+    {
+
+        type: "line",
+
+        data: {
+
+            labels: [],
+
+            datasets: [{
+
+                label:
+                    "Humidity %",
+
+                data: [],
+
+                borderColor:
+                    "#1689ff",
+
+                backgroundColor:
+                    "rgba(22,137,255,.1)",
+
+                tension: .35,
+
+                fill: true
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false
+
+        }
+
+    }
+
+);
+
+
+
+/* =========================================================
+   LDR CHART
+========================================================= */
+
+const ldrChart =
+new Chart(
+
+    document
+    .getElementById(
+        "ldrChart"
+    ),
+
+    {
+
+        type: "line",
+
+        data: {
+
+            labels: [],
+
+            datasets: [{
+
+                label:
+                    "LDR Value",
+
+                data: [],
+
+                borderColor:
+                    "#e7a91a",
+
+                backgroundColor:
+                    "rgba(231,169,26,.1)",
+
+                tension: .35,
+
+                fill: true
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false
+
+        }
+
+    }
+
+);
+
+
+
+/* =========================================================
+   HISTORY
+========================================================= */
+
+let historyData = [];
+
+
+database
+.ref("history")
+.limitToLast(20)
+.on("value", function(snapshot) {
+
+
+    const table =
+        document
+        .getElementById(
+            "historyTable"
+        );
+
+
+    table.innerHTML = "";
+
+
+    historyData = [];
+
+
+    const tempLabels = [];
+
+    const tempValues = [];
+
+    const humidityValues = [];
+
+    const ldrValues = [];
+
+
+
+    snapshot.forEach(function(child) {
+
+
+        const record =
+            child.val();
+
+
+        historyData.push(
+            record
+        );
+
+
+        const row =
+            document.createElement(
+                "tr"
+            );
+
+
+
+        const bulbDisplay =
+            typeof record.bulbState === "boolean"
+            ? (record.bulbState ? "ON" : "OFF")
+            : record.bulbState ?? "";
+
+
+
+        [
+
+            record.timestamp ?? "",
+
+            record.temperature ?? "",
+
+            record.humidity ?? "",
+
+            record.ldr ?? "",
+
+            bulbDisplay,
+
+            record.mode ?? ""
+
+        ]
+
+        .forEach(function(value) {
+
+
+            const cell =
+                document.createElement(
+                    "td"
+                );
+
+
+            cell.textContent =
+                value;
+
+
+            row.appendChild(
+                cell
+            );
+
+        });
+
+
+        table.appendChild(
+            row
+        );
+
+
+
+        tempLabels.push(
+            record.timestamp ?? ""
+        );
+
+
+        tempValues.push(
+            Number(
+                record.temperature ?? 0
+            )
+        );
+
+
+        humidityValues.push(
+            Number(
+                record.humidity ?? 0
+            )
+        );
+
+
+        ldrValues.push(
+            Number(
+                record.ldr ?? 0
+            )
+        );
+
+    });
+
+
+
+    if (
+        historyData.length === 0
+    ) {
+
+        table.innerHTML =
+
+        `
+        <tr>
+
+            <td
+                colspan="6"
+                class="empty">
+
+                No historical data available yet.
+
+            </td>
+
+        </tr>
+        `;
+
+    }
+
+
+
+    temperatureChart
+    .data
+    .labels =
+        tempLabels;
+
+
+    temperatureChart
+    .data
+    .datasets[0]
+    .data =
+        tempValues;
+
+
+    temperatureChart.update();
+
+
+
+    humidityChart
+    .data
+    .labels =
+        tempLabels;
+
+
+    humidityChart
+    .data
+    .datasets[0]
+    .data =
+        humidityValues;
+
+
+    humidityChart.update();
+
+
+
+    ldrChart
+    .data
+    .labels =
+        tempLabels;
+
+
+    ldrChart
+    .data
+    .datasets[0]
+    .data =
+        ldrValues;
+
+
+    ldrChart.update();
+
+});
+
+
+
+/* =========================================================
+   CSV DOWNLOAD
+========================================================= */
+
+function downloadCSV() {
+
+
+    if (
+        historyData.length === 0
+    ) {
+
+        alert(
+            "No historical data available."
+        );
+
+        return;
+
+    }
+
+
+    let csv =
+
+        "Timestamp,Temperature,Humidity,LDR,Bulb State,Operating Mode\n";
+
+
+
+    historyData.forEach(function(record) {
+
+
+        const bulbDisplay =
+
+            typeof record.bulbState === "boolean"
+
+            ? (
+                record.bulbState
+                ? "ON"
+                : "OFF"
+            )
+
+            : (
+                record.bulbState ?? ""
+            );
+
+
+
+        const row = [
+
+            record.timestamp ?? "",
+
+            record.temperature ?? "",
+
+            record.humidity ?? "",
+
+            record.ldr ?? "",
+
+            bulbDisplay,
+
+            record.mode ?? ""
+
+        ];
+
+
+
+        csv +=
+
+            row.map(
+
+                value =>
+
+                `"${String(value)
+                    .replaceAll(
+                        '"',
+                        '""'
+                    )}"`
+
+            )
+
+            .join(",")
+
+            + "\n";
+
+    });
+
+
+
+    const blob =
+
+        new Blob(
+
+            [csv],
+
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+
+        );
+
+
+
+    const url =
+
+        URL.createObjectURL(
+            blob
+        );
+
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        url;
+
+
+    link.download =
+        "Smart_IoT_Historical_Data.csv";
+
+
+    document
+    .body
+    .appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    document
+    .body
+    .removeChild(
+        link
+    );
+
+
+    URL.revokeObjectURL(
+        url
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE SIDEBAR ACTIVE ITEM WHILE SCROLLING
+========================================================= */
+
+const navigationSections = [
+    { id: "dashboard", index: 0 },
+    { id: "environment", index: 1 },
+    { id: "appliance-control", index: 2 },
+    { id: "analytics", index: 3 },
+    { id: "historical-data", index: 4 }
+];
+
+window.addEventListener("scroll", function() {
+
+    let currentId = "dashboard";
+
+    navigationSections.forEach(function(item) {
+        const section = document.getElementById(item.id);
+        if (section && window.scrollY >= section.offsetTop - 140) {
+            currentId = item.id;
+        }
+    });
+
+    const currentIndex = navigationSections.findIndex(function(item) {
+        return item.id === currentId;
+    });
+
+    document.querySelectorAll(".nav-item").forEach(function(item, index) {
+        item.classList.toggle("active", index === currentIndex);
+    });
+});
+
+</script>
+
+
+</body>
+
+</html>
